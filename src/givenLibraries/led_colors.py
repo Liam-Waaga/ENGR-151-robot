@@ -25,51 +25,57 @@ def show_found_black():
 
 def show_obstacle():
     """Flash red - obstacle detected."""
-    show_flash([200, 100, 100], flashes=3)
+    show_flash([255, 50, 50], flashes=3)
 
 def show_found_white():
     """White scanning pattern - following border."""
     for i in range(8):
         ws.write_all([0, 0, 0])
         ws[i] = [200, 200, 200]
-        time.sleep_ms(50)
+        time.sleep_ms(100)
         ws.write()
-        time.sleep_ms(500)
-
+        time.sleep_ms(100)
+        
 def show_found_red():
     """A red-themed celebration pattern."""
     for i in range(8):
         ws.write_all([0, 0, 0])
         ws[i] = [255, 0, 0]
-        time.sleep_ms(1000)
-        ws[i] = [255, 0, 0]
-        time.sleep_ms(1000)
-        ws[i] = [255, 0, 0]
+        time.sleep_ms(50)
         ws.write()
         time.sleep_ms(80)
+    for i in range(8):
+        ws.write_all([0, 0, 0])
+        ws[i] = [200, 0, 0]
+        time.sleep_ms(200)
+        ws.write()
+        time.sleep_ms(200)
+    show_flash([255,0,0],3,500,500)
     pass
 
 def show_found_green():
     """A green-themed celebration pattern."""
-    for i in range(8):
+    for i in range(5):
         ws.write_all([0, 0, 0])
         show_flash([0,255,0],3,100,100)
         ws[i] = [255, 0, 0]
-        show_flash([0,255,0],8,100,100)
+        time.sleep_ms(1000)
+        show_flash([0,255,0],3,100,100)
         time.sleep_ms(10)
         ws.write()
         time.sleep_ms(100)
     pass
 def show_found_blue():
     """A blue-themed celebration pattern."""
-    for i in range(8):
+    for i in range(2):
         ws.write_all([0, 0, 0])
-        show_flash([0,0,255],5,50,500)
+        show_flash([0,0,255],5,500,500)
         ws[i] = [0, 80, 180]
         show_flash([50,0,100],3,100,100)
         time.sleep_ms(50)
         ws.write()
-        time.sleep_ms(50)
+        ws[i] = [0, 0, 255]
+        time.sleep_ms(100)
     pass
 # Test each pattern
 print("Testing white...")
