@@ -1,4 +1,5 @@
 from PicoRobotics import KitronikPicoRobotics
+import PicoRobotics
 from machine import Pin
 from lcd1602 import LCD
 import time

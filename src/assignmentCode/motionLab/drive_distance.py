@@ -63,7 +63,7 @@ def drive_distance_mm(target_mm, speed=50):
 
 # Test: Drive 300mm (about 1 foot)
 try:
-    drive_distance_mm(300)
+    drive_distance_mm(800)
 except:
     board.motorOff(1)
     board.motorOff(2)
