@@ -104,8 +104,41 @@ def show_found_blue():
         time.sleep_ms(100)
     pass
 
-while True:
+def finale_color():
+    ws.write_all([0, 0, 0])
+    show_flash([0,0,255],1,500,500)
+    show_flash([0,255,0],1,500,500)
+    show_flash([255,0,0],1,500,500)
+    for i in range(8):
+        ws[i] = [0, 0, 255]
+        time.sleep_ms(50)
+        ws.write()
+        time.sleep_ms(10)
+    time.sleep_ms(10)
+    for i in range(8):
+        ws[i] = [0, 255, 0]
+        time.sleep_ms(50)
+        ws.write()
+        time.sleep_ms(10)
+    time.sleep_ms(10)
+    for i in range(8):
+        ws[i] = [255, 0, 0]
+        time.sleep_ms(50)
+        ws.write()
+        time.sleep_ms(10)
+    time.sleep_ms(400)
+    show_flash([0,0,255],1,200,500)
+    show_flash([0,255,0],1,500,500)
+    show_flash([255,0,0],1,300,500)
+    show_flash([255, 255, 255],3,200,400)
     
+
+def motor_sensor():
+    currentColor = sensor.get_color()[0]
+    return currentColor
+
+while True:
+    finale_color()
     #Bump counter
     front_pressed = front_bump.value() == 0
     rear_pressed = rear_bump.value() == 0
