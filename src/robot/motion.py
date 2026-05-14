@@ -32,42 +32,48 @@ def reset_ticks():
     right_ticks = 0
 
 # Distance constants
-WHEEL_DIAMETER = 67  # mm
+WHEEL_DIAMETER = 65  # mm
 WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * math.pi
 WHEEL_DISTANCE = 130
 MM_PER_TICK = WHEEL_CIRCUMFERENCE / 20
 TICKS_PER_MM = 20 / WHEEL_CIRCUMFERENCE
 
-def drive_mm(target_mm, speed=50): # 50 is good speed
+def drive_mm(target_mm): 
     """Drive forward a specified distance in millimeters."""
+    maxSpeed = 50
+    minSpeed = 25
     if target_mm < 0:
-        reverse=True
+        reverse = True
         target_mm = abs(target_mm)
     else:
-        reverse=False
+        reverse = False
 
     target_ticks = int(target_mm * TICKS_PER_MM)
     reset_ticks()
     
-    lcd.clear()
-    lcd.write(0, 0, f"Target: {target_mm}mm")
+    board.motorOn(1, ("r" if reverse else "f"), minSpeed)
+    board.motorOn(2, ("r" if reverse else "f"), minSpeed)
     
-    board.motorOn(1, ("r" if reverse else "f"), speed)
-    board.motorOn(2, ("r" if reverse else "f"), speed)
-    
-    while (left_ticks + right_ticks) / 2 < target_ticks:
+    while left_ticks < target_ticks and right_ticks < target_ticks:
+        difference = left_ticks - right_ticks
+        leftProgress = left_ticks / target_ticks
+        rightProgress = right_ticks / target_ticks
+        
+        leftSpeed = max(round(((maxSpeed - minSpeed) * (math.sin((leftProgress + 3/4) * math.pi) + 1) / 2) + minSpeed) - 3 * difference, 20)
+        rightSpeed = max(round(((maxSpeed - minSpeed) * (math.sin((rightProgress + 3/4) * math.pi) + 1) / 2) + minSpeed) + 3 * difference, 20)
+        print("LeftS: " + str(leftSpeed) + " RightS: " + str(rightSpeed))
+        print("LeftP: " + str(leftProgress) + " RightP: " + str(rightProgress))
+        
+        board.motorOn(1, ("r" if reverse else "f"), leftSpeed)
+        board.motorOn(2, ("r" if reverse else "f"), rightSpeed)
+        
         avg_ticks = (left_ticks + right_ticks) / 2
         current_mm = avg_ticks * MM_PER_TICK
-        lcd.write(0, 1, f"Now: {current_mm:.0f}mm   ")
         time.sleep(0.05)
     
     board.motorOff(1)
     board.motorOff(2)
-    
-    lcd.clear()
-    lcd.write(0, 0, "Done!")
-    final_mm = ((left_ticks + right_ticks) / 2) * MM_PER_TICK
-    lcd.write(0, 1, f"Traveled: {final_mm:.0f}mm")
+    time.sleep(0.1)
 
 def drive_straight_mm(target_mm, base_speed=50):
     # Reverse:
@@ -118,8 +124,6 @@ def drive_straight_mm(target_mm, base_speed=50):
     board.motorOff(1)
     board.motorOff(2)
 
-
-
 def turn_deg(angle, base_speed=35):
     target_mm = abs(angle) * (13/36 * math.pi)
     direction = "left" if (angle < 0) else "right"
@@ -144,8 +148,8 @@ def turn_deg(angle, base_speed=35):
 def __motor_test():
     # Test: Drive 300mm (about 1 foot)
     try:
-        drive_straight_mm(200)
-        drive_straight_mm(-200)
+        drive_mm(400)
+        drive_mm(-400)
     except:
         board.motorOff(1)
         board.motorOff(2)
