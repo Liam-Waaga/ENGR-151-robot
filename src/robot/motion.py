@@ -38,8 +38,14 @@ WHEEL_DISTANCE = 130
 MM_PER_TICK = WHEEL_CIRCUMFERENCE / 20
 TICKS_PER_MM = 20 / WHEEL_CIRCUMFERENCE
 
-def drive_distance_mm(target_mm, speed=50, reverse=False): # 50 is good speed
+def drive_mm(target_mm, speed=50): # 50 is good speed
     """Drive forward a specified distance in millimeters."""
+    if target_mm < 0:
+        reverse=True
+        target_mm = abs(target_mm)
+    else:
+        reverse=False
+
     target_ticks = int(target_mm * TICKS_PER_MM)
     reset_ticks()
     
@@ -83,15 +89,13 @@ def turn_deg(angle, base_speed=35):
     
     board.motorOff(2)
     board.motorOff(1)
-    time.sleep(1) 
 
 
 def __motor_test():
     # Test: Drive 300mm (about 1 foot)
     try:
-        drive_distance_mm(800)
-        turn_deg(180)
-        drive_distance_mm(800)
+        drive_mm(200)
+        drive_mm(-200)
         #turn_deg(-135)
         #drive_distance_mm(800)
         #drive_distance_mm(800, reverse=True)
@@ -99,3 +103,5 @@ def __motor_test():
         board.motorOff(1)
         board.motorOff(2)
         raise
+
+__motor_test()
