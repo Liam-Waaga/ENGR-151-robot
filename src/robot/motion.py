@@ -69,6 +69,56 @@ def drive_mm(target_mm, speed=50): # 50 is good speed
     final_mm = ((left_ticks + right_ticks) / 2) * MM_PER_TICK
     lcd.write(0, 1, f"Traveled: {final_mm:.0f}mm")
 
+def drive_straight_mm(target_mm, base_speed=50):
+    # Reverse:
+    if target_mm < 0:
+        reverse=True
+        target_mm = abs(target_mm)
+    else:
+        reverse=False
+
+    """Drive forward with correction to maintain straight line."""
+    target_ticks = int(target_mm * TICKS_PER_MM)
+    reset_ticks()
+    
+    left_speed = base_speed
+    right_speed = base_speed
+    correction = 3  # Speed adjustment amount
+    
+    board.motorOn(1, ("r" if reverse else "f"), right_speed)
+    board.motorOn(2, ("r" if reverse else "f"), left_speed)
+    
+    while (left_ticks + right_ticks) / 2 < target_ticks:
+        # Compare wheel progress
+        diff = left_ticks - right_ticks
+        
+        # Adjust speeds to correct drift
+        if diff > 2:  # Left wheel ahead, slow it down
+            left_speed = base_speed - correction
+            right_speed = base_speed + correction
+        elif diff < -2:  # Right wheel ahead, slow it down
+            left_speed = base_speed + correction
+            right_speed = base_speed - correction
+        else:
+            left_speed = base_speed
+            right_speed = base_speed
+        
+        # Keep speeds in valid range
+        left_speed = max(20, min(100, left_speed))
+        right_speed = max(20, min(100, right_speed))
+        
+        board.motorOn(1, ("r" if reverse else "f"), right_speed)
+        board.motorOn(2, ("r" if reverse else "f"), left_speed)
+        
+        lcd.clear()
+        lcd.write(0, 0, f"L:{left_ticks} R:{right_ticks}")
+        lcd.write(0, 1, f"Diff: {diff}")
+        time.sleep(0.05)
+    
+    board.motorOff(1)
+    board.motorOff(2)
+
+
 
 def turn_deg(angle, base_speed=35):
     target_mm = abs(angle) * (13/36 * math.pi)
@@ -94,11 +144,8 @@ def turn_deg(angle, base_speed=35):
 def __motor_test():
     # Test: Drive 300mm (about 1 foot)
     try:
-        drive_mm(200)
-        drive_mm(-200)
-        #turn_deg(-135)
-        #drive_distance_mm(800)
-        #drive_distance_mm(800, reverse=True)
+        drive_straight_mm(200)
+        drive_straight_mm(-200)
     except:
         board.motorOff(1)
         board.motorOff(2)
