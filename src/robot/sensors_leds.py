@@ -27,6 +27,9 @@ sensor.WHITE_MAX_RATIO_SPREAD = 70.6  # From calibrate_white output
 #Variables
 frontBumperCount = 0
 backBumperCount = 0
+Redcheck = True
+Greencheck = True
+Bluecheck = True
 
 
 def show_solid(color):
@@ -138,7 +141,6 @@ def motor_sensor():
     return currentColor
 
 while True:
-    finale_color()
     #Bump counter
     front_pressed = front_bump.value() == 0
     rear_pressed = rear_bump.value() == 0
@@ -156,11 +158,14 @@ while True:
     #if color do this
     currentColor = sensor.get_color()[0]
     print(str(currentColor))
-    if currentColor == "Red":
+    if currentColor == "Red" and Redcheck == True:
+        Redcheck = False
         show_found_red()
-    elif currentColor == "Green":
+    elif currentColor == "Green" and Greencheck == True:
+        Greencheck = False
         show_found_green()
-    elif currentColor == "Blue":
+    elif currentColor == "Blue" and Bluecheck == True:
+        Bluecheck = False
         show_found_blue()
     elif currentColor == "White":
         show_found_white()
