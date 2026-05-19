@@ -25,26 +25,13 @@ sensor.WHITE_MAX_RATIO_SPREAD = 70.6  # From calibrate_white output
 #Variables
 frontBumperCount = 0
 backBumperCount = 0
+
+#Check to make sure each of RGB is activated only once.
 Redcheck = True
 Greencheck = True
 Bluecheck = True
 
-
-def show_solid(color):
-    """Display solid color on all LEDs."""
-    ws.write_all(color)
-    ws.write()
-
-def show_flash(color, flashes=3, on_ms=200, off_ms=200):
-    """Flash all LEDs a specified number of times."""
-    for _ in range(flashes):
-        ws.write_all(color)
-        ws.write()
-        time.sleep_ms(on_ms)
-        ws.write_all([0, 0, 0])
-        ws.write()
-        time.sleep_ms(off_ms)
-
+#Function for color scanning for motors.
 def motor_sensor():
     currentColor = sensor.get_color()[0]
     return currentColor
@@ -64,26 +51,26 @@ while True:
 
     lcd.write(0, 1, "REAR: " + str(backBumperCount))
     
-    #if color do this
+    #What to do when a color is scanned, calls from the file leds.
     currentColor = sensor.get_color()[0]
     print(str(currentColor))
     if currentColor == "Red" and Redcheck == True:
         Redcheck = False
-        show_found_red()
+        led.show_found_red()
     elif currentColor == "Green" and Greencheck == True:
         Greencheck = False
-        show_found_green()
+        led.show_found_green()
     elif currentColor == "Blue" and Bluecheck == True:
         Bluecheck = False
-        show_found_blue()
+        led.show_found_blue()
     elif currentColor == "White":
-        show_found_white()
+        led.show_found_white()
     elif currentColor == "Black":
-        show_found_black()
+        led.show_found_black()
     
     #if bump flash
     if front_pressed or rear_pressed:
-        show_obstacle()
+        led.show_obstacle()
     
     time.sleep(0.1)
     
