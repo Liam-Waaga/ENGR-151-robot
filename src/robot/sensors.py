@@ -37,12 +37,14 @@ def motor_sensor():
     currentColor = sensor.get_color()[0]
     return currentColor
 
-while True:
+def sensorRun():
+    global Bluecheck
+    global Redcheck #Globalizes the variables making them work with previous defintions of them.
+    global Greencheck
     #Bump counter.
     front_pressed = front_bump.value() == 0
     rear_pressed = rear_bump.value() == 0
     ws.write_all([0, 0, 0])
-    
     if front_pressed:
         global frontBumperCount
         frontBumperCount += 1
