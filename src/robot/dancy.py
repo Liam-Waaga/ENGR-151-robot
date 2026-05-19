@@ -3,18 +3,21 @@ Defines dances and a panic function
 Includes:
     -panic()        *has optional parameters
     -dance_green()
-    -dance_blue()
+    -dance_blue()   *has optional parameters
     -dance_red()    *has optional parameters
     -victory()      *has optional parameters
+Also Includes (meant for keeping clutter clear): 
     -endprogram()
+    -clean_and_close()  *has optional parameters
     
 #TODO:
--green
--blue
 -verify everything works
+-add descriptive comments
 
+Could sensors.py be imported rather than leds.py? Both have show_flash() and the light shows from leds.py are adapted into this file
+Should a motor stop all function be added to clean_and_close() and/or endprogram()
 '''
-
+#Imports
 import machine
 import motion
 import time
@@ -27,6 +30,15 @@ ws = WS2812(machine.Pin(28), 8)
 
 
 
+def clean_and_close(color=None):
+    ''' makes sure everything is off when returning / prints saying finished with section'''
+    
+    if color is not None:
+        print(f'finished {color} dance')
+    ws.write_all([0, 0, 0])
+    LCD.clear()
+
+
 
 def endprogram():
     ''' bot sleeps for 1 hour '''
@@ -37,16 +49,16 @@ def endprogram():
 
 
 
-def panic(flashcount=5, shutdown=False):
+def panic(flashcount=3, shutdown=True):
     ''' sos mode '''
     #This function by default is a dead end
     
     #takes in flashcount:
     #    repeats that many times
-    #    (Default) otherwise: repeats 5 times
+    #    (Default) otherwise: repeats 3 times
     
     #takes in leave
-    #    if set to true: leaves definition
+    #    if set to False: leaves definition
     #    (Default) otherwise: terminates program
     
     #settings:
@@ -57,41 +69,73 @@ def panic(flashcount=5, shutdown=False):
     
     
     LCD.write('!!!PANIC!!!')
-
+    print('sos')
     for _ in range(flashcount):
         leds.show_flash(*s)
         time.sleep_ms(rest)
-        
         leds.show_flash(*o)
         time.sleep_ms(rest)
-        
         leds.show_flash(*s)
-        time.sleep_ms(rest)
-        
-        time.sleep_ms(rest)
-        
-    if shutdown is False:
-        endprogram()
-    LCD.clear()
+        time.sleep_ms(2 * rest)
+    clean_and_close('panic')
     
-'''
+    if shutdown is True:
+        endprogram()
+    
+    
 
 def dance_green():
-    for i in range(10):
-        motion.drive_distance_mm(50, 200)
-        motion.drive_distance_mm(50, 200)
+    ''' Green Dance '''
+    
+    text = 'Found Green!'
+    
+    print(text)
+    for i in range(8):
+        leds.show_flash([0,255,0],3,100,100)
+        ws[i] = [0, 255, 0]
+        ws.write()
+        if i % 3 == 1:
+            LCD.clear()
+            LCD.write(text[:(i+5)])
+        if i % 2 == 0:
+            motion.drive_distance_mm(-50, 200)
+        else:
+            motion.drive_distance_mm(50, 200)
+        time.sleep_ms(100)
+        leds.show_flash([0,255,0],2,50,100)
+        time.sleep_ms(100)
+    clean_and_close('green')
 
 
 
-def dance_blue():
-    motion.turn_deg(360, 100)
-    motion.turn_deg(360, 100)
-    motion.turn_deg(360, 100)
-    motion.turn_deg(360, 100)
-    motion.turn_deg(360, 100)
-    motion.turn_deg(360, 100)
+def dance_blue(repeat=1):
+    ''' Blue Dance '''
+    
+    #takes in repeat:
+    #    repeats that many times
+    #    (Default) otherwise: repeats 1 times
+    
+    text = 'Found Blue!'
+    
+    print(text)
+    for i in range(repeat):
+        ws.write_all([0, 0, 0])
+        LCD.write(text)
+        for _ in range(5):
+            for j in range(0,256,1):
+                ws.write_all([0, 0, i])
+                time.sleep_us(500)
+            for j in range(255,-1,-1):
+                ws.write_all([0, 0, i])
+                time.sleep_us(500)
+        LCD.clear()
+        leds.show_flash([50,0,100],3,100,100) #should this be lavender?
+        time.sleep_ms(100)
+        motion.turn_deg(90, 200)
+        motion.turn_deg(-180, 200)
+        motion.turn_deg(90, 200)
+    clean_and_close('blue')
 
-'''
 
 def dance_red(pivots=2):
     ''' Red Dance '''
@@ -102,6 +146,7 @@ def dance_red(pivots=2):
     
     text = 'Found Red!'
     
+    print(text)
     LCD.write(text)
     for i in range(8):
         ws.write_all([0, 0, 0])
@@ -133,7 +178,7 @@ def dance_red(pivots=2):
     motion.turn_deg(-5, motorstrength)
     
     leds.show_flash([255,0,0],1,100,0)
-    LCD.clear()
+    clean_and_close('red')
 
 
 
@@ -158,6 +203,7 @@ def victory(endspincount=5,shutdown=False):
     
     
     #the real stuff
+    print('Victory Time!')
     LCD.write(text)
     leds.show_flash([0,0,255],1,500,500)
     leds.show_flash([0,255,0],1,500,500)
@@ -210,7 +256,7 @@ def victory(endspincount=5,shutdown=False):
     LCD.write(text)
     leds.show_flash([255, 255, 255],3,200,200)
     motion.turn_deg(endspincountdeg, 200)
-    LCD.clear()
+    clean_and_close('victory')
     
     if shutdown is True:
         ws[0] = [255, 255, 255]  # White
@@ -221,15 +267,17 @@ def victory(endspincount=5,shutdown=False):
         ws[5] = [0, 255, 255]    # Cyan
         ws[6] = [255, 0, 255]    # Magenta
         ws[7] = [255, 255, 255]  # White
-
-        LCD.write('Shutting down')
+        
+        print('Shutting Down')
+        LCD.write('ShuttingDown')
         ws.write()
 
         for i in range(-1,-9,-1):
             ws[i] = [0,0,0]
             time.sleep_ms(250)
             ws.write()
-        LCD.clear()
+           
+        clean_and_close('Victory Shutdown')
         endprogram()
 
 
@@ -239,11 +287,11 @@ def victory(endspincount=5,shutdown=False):
 '''
 Credits:
 Michael McKenzie
-red, blue, green, and finale led shows adapted from shows listed in leds.py (written by Micah _______) to be able to have motor movements and lcd visuals inserted in the middle
+red, blue, green, and finale led shows adapted from shows listed in leds.py (written by Micah Patelli) to be able to have motor movements and lcd visuals inserted in the middle
 
 
 AI use (Gemini):
-    -to learn how to define functions in functions (not used in the end product)
+    -to learn how to define functions in functions
     -to learn about how to effectively make the robot stop indefinitly using machine.lightsleep()
     -to troubleshoot code when writing code not at school
 
