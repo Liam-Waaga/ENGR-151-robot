@@ -1,5 +1,6 @@
 import machine
 from machine import Pin, I2C
+import dancy
 import leds
 import time
 from color_sensor import ColorSensor
@@ -56,21 +57,21 @@ while True:
     print(str(currentColor))
     if currentColor == "Red" and Redcheck == True:
         Redcheck = False
-        led.show_found_red()
+        dancy.dance_red()
     elif currentColor == "Green" and Greencheck == True:
         Greencheck = False
-        led.show_found_green()
+        dancy.dance_green()
     elif currentColor == "Blue" and Bluecheck == True:
         Bluecheck = False
-        led.show_found_blue()
+        dancy.dance_blue()
     elif currentColor == "White":
-        led.show_found_white()
+        leds.show_found_white()
     elif currentColor == "Black":
-        led.show_found_black()
+        dancy.show_found_black()
     
     #If bumper activates, calls from the file leds.
     if front_pressed or rear_pressed:
-        led.show_obstacle()
+        leds.show_obstacle()
     
     time.sleep(0.1)
     
