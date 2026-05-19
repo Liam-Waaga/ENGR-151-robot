@@ -33,10 +33,10 @@ ws = WS2812(machine.Pin(28), 8)
 def clean_and_close(color=None):
     ''' makes sure everything is off when returning / prints saying finished with section'''
     
-    if color is not None:
+    if color is not None: # if given a string, it prints it in a logging meassage
         print(f'finished {color} dance')
-    ws.write_all([0, 0, 0])
-    LCD.clear()
+    ws.write_all([0, 0, 0]) # makes sure led is off
+    LCD.clear() # makes sure lcd is off
 
 
 
@@ -68,18 +68,19 @@ def panic(flashcount=3, shutdown=True):
     rest = 100 #milliseconds
     
     
+    print('panic') #logs the start of panic
     LCD.write('!!!PANIC!!!')
-    print('sos')
-    for _ in range(flashcount):
+    
+    for _ in range(flashcount): # plays sos in morse code
         leds.show_flash(*s)
         time.sleep_ms(rest)
         leds.show_flash(*o)
         time.sleep_ms(rest)
         leds.show_flash(*s)
         time.sleep_ms(2 * rest)
-    clean_and_close('panic')
+    clean_and_close('panic') #logs the end of panic
     
-    if shutdown is True:
+    if shutdown is True: # shuts robot down if not set otherwise
         endprogram()
     
     
@@ -89,22 +90,25 @@ def dance_green():
     
     text = 'Found Green!'
     
-    print(text)
+    print(text) # logs the start of green dance
     for i in range(8):
-        leds.show_flash([0,255,0],3,100,100)
+        leds.show_flash([0,255,0],3,100,100) # 3 flash blue
         ws[i] = [0, 255, 0]
-        ws.write()
-        if i % 3 == 1:
+        ws.write() #write a single blue led at index i
+        
+        if i % 3 == 1: #shows 'Found ' and every once in a while reveals 3 more characters
             LCD.clear()
             LCD.write(text[:(i+5)])
-        if i % 2 == 0:
+        
+        if i % 2 == 0: # drive back and forth
             motion.drive_distance_mm(-50, 200)
         else:
             motion.drive_distance_mm(50, 200)
+        
         time.sleep_ms(100)
-        leds.show_flash([0,255,0],2,50,100)
+        leds.show_flash([0,255,0],2,50,100) #2 flash blue
         time.sleep_ms(100)
-    clean_and_close('green')
+    clean_and_close('green') # logs the end of green dance
 
 
 
@@ -117,24 +121,26 @@ def dance_blue(repeat=1):
     
     text = 'Found Blue!'
     
-    print(text)
+    print(text) # log start of blue dance
     for i in range(repeat):
         ws.write_all([0, 0, 0])
         LCD.write(text)
-        for _ in range(5):
+        
+        for _ in range(5): # fades blue in and out 5 times
             for j in range(0,256,1):
-                ws.write_all([0, 0, i])
+                ws.write_all([0, 0, j])
                 time.sleep_us(500)
             for j in range(255,-1,-1):
-                ws.write_all([0, 0, i])
+                ws.write_all([0, 0, j])
                 time.sleep_us(500)
+                
         LCD.clear()
         leds.show_flash([50,0,100],3,100,100) #should this be lavender?
         time.sleep_ms(100)
         motion.turn_deg(90, 200)
         motion.turn_deg(-180, 200)
         motion.turn_deg(90, 200)
-    clean_and_close('blue')
+    clean_and_close('blue') # log end of blue dance
 
 
 def dance_red(pivots=2):
