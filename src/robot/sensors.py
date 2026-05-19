@@ -44,10 +44,12 @@ while True:
     ws.write_all([0, 0, 0])
     
     if front_pressed:
+        global frontBumperCount
         frontBumperCount += 1
     lcd.write(0, 0, "FRONT: " + str(frontBumperCount))
     
     if rear_pressed:
+        global backBumperCount
         backBumperCount += 1
 
     lcd.write(0, 1, "REAR: " + str(backBumperCount))
